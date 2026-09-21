@@ -1,0 +1,107 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:CustomInvoiceApp"
+        x:Class="CustomInvoiceApp.MainWindow"
+        Title="Invoice Generator" Width="1100" Height="840" MinWidth="900" MinHeight="600">
+  <Window.Styles>
+    <Style Selector="Border.panel">
+      <Setter Property="BorderBrush" Value="#D0D0D0" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Padding" Value="12" />
+    </Style>
+  </Window.Styles>
+
+  <DockPanel Margin="16">
+
+    <!-- Bottom bar: total + buttons -->
+    <Grid DockPanel.Dock="Bottom" ColumnDefinitions="Auto,*,Auto" Margin="0,12,0,0">
+      <Button Grid.Column="0" Content="+ Add line" Click="AddLine_Click" />
+      <TextBlock Grid.Column="1" x:Name="GrandTotalText" HorizontalAlignment="Right"
+                 VerticalAlignment="Center" Margin="0,0,16,0" FontWeight="SemiBold" FontSize="15" />
+      <Button Grid.Column="2" Content="Generate" Click="Generate_Click" Classes="accent"
+              Padding="24,8" FontWeight="SemiBold" />
+    </Grid>
+
+    <!-- Data folder (addresses, invoice settings, logo) + settings -->
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,0,0,12">
+      <TextBlock Grid.Column="0" Text="Data folder:" VerticalAlignment="Center" Margin="0,0,8,0" />
+      <TextBlock Grid.Column="1" x:Name="DataFolderText" VerticalAlignment="Center"
+                 TextTrimming="CharacterEllipsis" Foreground="#555" />
+      <Button Grid.Column="2" Content="Change folder…" Click="ChangeFolder_Click" Margin="8,0,0,0" />
+      <Button Grid.Column="3" Content="⚙ Settings…" Click="Settings_Click" Margin="8,0,0,0" />
+    </Grid>
+    <TextBlock DockPanel.Dock="Top" x:Name="StatusText" Foreground="#B00020" Margin="0,0,0,8"
+               IsVisible="False" TextWrapping="Wrap" />
+
+    <!-- Invoice details -->
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="12" Margin="0,0,0,12">
+      <TextBlock Text="Invoice no." VerticalAlignment="Center" />
+      <TextBox x:Name="InvoiceNumberBox" Width="140" />
+      <TextBlock Text="Date" VerticalAlignment="Center" Margin="12,0,0,0" />
+      <CalendarDatePicker x:Name="InvoiceDatePicker" Width="160" />
+    </StackPanel>
+
+    <!-- Addresses -->
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,16,*" Margin="0,0,0,16">
+      <Border Grid.Column="0" Classes="panel">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Billing Address" FontWeight="SemiBold" FontSize="15" />
+          <AutoCompleteBox x:Name="BillingSearch" FilterMode="Contains" MinimumPrefixLength="0"
+                           PlaceholderText="Search saved billing addresses…" />
+          <TextBox x:Name="BillingName" PlaceholderText="Customer name" />
+          <TextBox x:Name="BillingAddress" PlaceholderText="Address (one line per row)"
+                   AcceptsReturn="True" TextWrapping="Wrap" Height="110" />
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="2" Classes="panel">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Delivery Address" FontWeight="SemiBold" FontSize="15" />
+          <AutoCompleteBox x:Name="DeliverySearch" FilterMode="Contains" MinimumPrefixLength="0"
+                           PlaceholderText="Search saved delivery addresses…" />
+          <TextBox x:Name="DeliveryName" PlaceholderText="Customer name" />
+          <TextBox x:Name="DeliveryAddress" PlaceholderText="Address (one line per row)"
+                   AcceptsReturn="True" TextWrapping="Wrap" Height="110" />
+          <CheckBox x:Name="SameAsBilling" Content="Delivery Address is same as Billing Address" />
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Column headers (text comes from the settings) -->
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,110,140,110,130,40" Margin="0,0,0,4">
+      <TextBlock Grid.Column="0" x:Name="ItemHeader" FontWeight="SemiBold" />
+      <TextBlock Grid.Column="1" x:Name="UnitsHeader" FontWeight="SemiBold" Width="102" Margin="4,0"
+                 IsVisible="{Binding $parent[local:MainWindow].ShowUnitsColumn}" />
+      <TextBlock Grid.Column="2" x:Name="QuantityHeader" FontWeight="SemiBold" Margin="4,0" />
+      <TextBlock Grid.Column="3" x:Name="PriceHeader" FontWeight="SemiBold" Margin="4,0" />
+      <TextBlock Grid.Column="4" x:Name="TaxHeader" FontWeight="SemiBold" HorizontalAlignment="Right" Margin="4,0" />
+      <TextBlock Grid.Column="5" x:Name="TotalHeader" FontWeight="SemiBold" HorizontalAlignment="Right" Margin="4,0" />
+    </Grid>
+
+    <!-- Line items -->
+    <ScrollViewer>
+      <ItemsControl x:Name="LinesList">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="local:LineItem">
+            <Grid ColumnDefinitions="*,Auto,110,140,110,130,40" Margin="0,2">
+              <TextBox Grid.Column="0" Text="{Binding Name}" PlaceholderText="Item description" />
+              <NumericUpDown Grid.Column="1" Value="{Binding Units}" Minimum="0" Increment="1"
+                             FormatString="0" Margin="4,0" Width="102"
+                             IsVisible="{Binding $parent[local:MainWindow].ShowUnitsColumn}" />
+              <NumericUpDown Grid.Column="2" Value="{Binding Quantity}" Minimum="0" Increment="1"
+                             FormatString="0" Margin="4,0" />
+              <NumericUpDown Grid.Column="3" Value="{Binding PriceExTax}" Minimum="0" Increment="0.5"
+                             FormatString="0.00" Margin="4,0" />
+              <TextBlock Grid.Column="4" Text="{Binding TaxDisplay}" VerticalAlignment="Center"
+                         HorizontalAlignment="Right" Margin="4,0" />
+              <TextBlock Grid.Column="5" Text="{Binding TotalIncTaxDisplay}" VerticalAlignment="Center"
+                         HorizontalAlignment="Right" Margin="4,0" />
+              <Button Grid.Column="6" Content="✕" Click="RemoveLine_Click" Tag="{Binding}"
+                      HorizontalAlignment="Right" ToolTip.Tip="Remove line" />
+            </Grid>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</Window>

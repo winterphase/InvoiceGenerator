@@ -1,0 +1,13 @@
+# Build output
+bin/
+obj/
+publish/
+
+# Editor / OS files
+.vs/
+.vscode/
+.idea/
+*.user
+*.sln
+.DS_Store
+Thumbs.db

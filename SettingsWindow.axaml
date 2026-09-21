@@ -1,0 +1,131 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="CustomInvoiceApp.SettingsWindow"
+        Title="Invoice Settings" Width="720" Height="700" MinWidth="600" MinHeight="500"
+        WindowStartupLocation="CenterOwner">
+  <Window.Styles>
+    <Style Selector="TextBlock.label">
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,8,0,2" />
+    </Style>
+    <Style Selector="TextBlock.hint">
+      <Setter Property="Foreground" Value="#777" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBox.multi">
+      <Setter Property="AcceptsReturn" Value="True" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Height" Value="140" />
+    </Style>
+  </Window.Styles>
+
+  <DockPanel Margin="16">
+    <Grid DockPanel.Dock="Bottom" ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,12,0,0">
+      <Button Grid.Column="0" Content="Preview invoice" Click="Preview_Click" />
+      <TextBlock Grid.Column="1" x:Name="ErrorText" Foreground="#B00020" VerticalAlignment="Center"
+                 Margin="12,0" TextWrapping="Wrap" />
+      <Button Grid.Column="2" Content="Cancel" Click="Cancel_Click" Margin="0,0,8,0" />
+      <Button Grid.Column="3" Content="Save" Click="Save_Click" Classes="accent" Padding="24,6" />
+    </Grid>
+
+    <TabControl>
+      <!-- Business -->
+      <TabItem Header="Business">
+        <ScrollViewer>
+          <StackPanel Margin="4,8">
+            <TextBlock Classes="label" Text="Business name" />
+            <TextBox x:Name="BusinessNameBox" />
+
+            <TextBlock Classes="label" Text="Logo" />
+            <Grid ColumnDefinitions="*,Auto,Auto">
+              <TextBlock Grid.Column="0" x:Name="LogoText" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+              <Button Grid.Column="1" Content="Choose…" Click="ChooseLogo_Click" Margin="8,0" />
+              <Button Grid.Column="2" Content="Remove" Click="RemoveLogo_Click" />
+            </Grid>
+            <Border BorderBrush="#DDD" BorderThickness="1" Padding="8" Margin="0,6,0,0"
+                    HorizontalAlignment="Left" x:Name="LogoPreviewBorder">
+              <Image x:Name="LogoPreview" MaxHeight="90" MaxWidth="300" />
+            </Border>
+            <TextBlock Classes="hint" Text="PNG, JPG or SVG. SVG prints sharpest. SVGs don't preview here — use Preview invoice." />
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+              <TextBlock Text="Logo width on invoice (points, A4 page is 595 wide)" VerticalAlignment="Center" />
+              <NumericUpDown x:Name="LogoWidthBox" Minimum="40" Maximum="520" Increment="10" FormatString="0" Width="130" />
+            </StackPanel>
+            <CheckBox x:Name="ShowNameWithLogoBox" Content="Also show the business name under the logo" Margin="0,6,0,0" />
+
+            <TextBlock Classes="label" Text="Business details (shown under the logo, one per line)" />
+            <TextBox x:Name="BusinessDetailsBox" Classes="multi" Height="170" />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- Look -->
+      <TabItem Header="Look &amp; Money">
+        <ScrollViewer>
+          <StackPanel Margin="4,8">
+            <TextBlock Classes="label" Text="Invoice title" />
+            <TextBox x:Name="InvoiceTitleBox" />
+
+            <TextBlock Classes="label" Text="Title font (invoice title and business name)" />
+            <AutoCompleteBox x:Name="TitleFontBox" FilterMode="ContainsOrdinal" MinimumPrefixLength="0" />
+            <TextBlock Classes="label" Text="Body font (everything else)" />
+            <AutoCompleteBox x:Name="BodyFontBox" FilterMode="ContainsOrdinal" MinimumPrefixLength="0" />
+            <TextBlock Classes="hint" Text="Fonts installed on this computer. If a computer doesn't have the chosen font, invoices made there use Lato instead." />
+
+            <TextBlock Classes="label" Text="Text colour (hex, e.g. #333333)" />
+            <TextBox x:Name="TextColourBox" Width="160" HorizontalAlignment="Left" />
+
+            <Grid ColumnDefinitions="*,16,*,16,*" Margin="0,8,0,0">
+              <StackPanel Grid.Column="0">
+                <TextBlock Classes="label" Text="Currency symbol" />
+                <TextBox x:Name="CurrencyBox" />
+              </StackPanel>
+              <StackPanel Grid.Column="2">
+                <TextBlock Classes="label" Text="Tax name" />
+                <TextBox x:Name="TaxNameBox" />
+              </StackPanel>
+              <StackPanel Grid.Column="4">
+                <TextBlock Classes="label" Text="Tax rate (%)" />
+                <NumericUpDown x:Name="TaxRateBox" Minimum="0" Maximum="100" Increment="0.5" FormatString="0.##" />
+              </StackPanel>
+            </Grid>
+
+            <TextBlock Classes="label" Text="Column names" Margin="0,16,0,2" />
+            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" >
+              <TextBlock Grid.Row="0" Text="Item" VerticalAlignment="Center" Margin="0,0,12,0" />
+              <TextBox Grid.Row="0" Grid.Column="1" x:Name="ItemLabelBox" Margin="0,2" />
+              <TextBlock Grid.Row="1" Text="Grouping (e.g. Cases)" VerticalAlignment="Center" Margin="0,0,12,0" />
+              <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="0,2">
+                <TextBox x:Name="UnitsLabelBox" Width="200" />
+                <CheckBox x:Name="ShowUnitsBox" Content="Show this column" />
+              </StackPanel>
+              <TextBlock Grid.Row="2" Text="Quantity (e.g. Bottles)" VerticalAlignment="Center" Margin="0,0,12,0" />
+              <TextBox Grid.Row="2" Grid.Column="1" x:Name="QuantityLabelBox" Margin="0,2" />
+            </Grid>
+            <TextBlock Classes="hint" Margin="0,4,0,0"
+                       Text="Line total = price × quantity, plus tax. The grouping column is for information only." />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- Footer -->
+      <TabItem Header="Payment &amp; Footer">
+        <ScrollViewer>
+          <StackPanel Margin="4,8">
+            <TextBlock Classes="label" Text="Payment details (bottom of the invoice)" />
+            <TextBox x:Name="PaymentDetailsBox" Classes="multi" />
+            <TextBlock Classes="hint" Text="Write lines as &quot;Label: value&quot; (e.g. Sort Code: 12-34-56) to line them up with a bold label." />
+            <CheckBox x:Name="SignatureBox" Content="Show Name and Date signature lines" Margin="0,8,0,0" />
+
+            <TextBlock Classes="label" Text="Small print (very bottom of every page)" />
+            <TextBox x:Name="SmallPrintBox" Classes="multi" />
+
+            <TextBlock Classes="label" Text="Website (optional, shown as a link under the small print)" />
+            <TextBox x:Name="WebsiteBox" />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</Window>
