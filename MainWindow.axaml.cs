@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 
@@ -21,6 +22,10 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<LineItem> _lines = new();
     private readonly AppSettings _settings = AppSettings.Load();
     private AddressStore _store = new();
+    private ProductStore _productStore = new();
+
+    /// <summary>Saved products offered in the item name boxes.</summary>
+    public ObservableCollection<Product> Products { get; } = new();
     private InvoiceProfile _profile = new();
 
     // Saved record the current address was picked from, if any
@@ -130,6 +135,7 @@ public partial class MainWindow : Window
         {
             // New, empty folder: start it off with what we already have
             if (!AddressStore.ExistsIn(folder)) _store.Save(folder);
+            if (!ProductStore.ExistsIn(folder)) _productStore.Save(folder);
             if (!InvoiceProfile.ExistsIn(folder))
             {
                 var copy = _profile.Clone();
@@ -171,6 +177,44 @@ public partial class MainWindow : Window
         }
         RefreshAddressLists();
         return true;
+    }
+
+    // ---------- Products ----------
+
+    private bool ReloadProducts()
+    {
+        try
+        {
+            _productStore = ProductStore.Load(_settings.DataFolder);
+        }
+        catch (Exception ex)
+        {
+            ShowStatus($"Couldn't read saved products from {_settings.DataFolder}: {ex.Message}");
+            return false;
+        }
+        RefreshProductList();
+        return true;
+    }
+
+    private void RefreshProductList()
+    {
+        var sorted = _productStore.Products.Values.OrderBy(p => p.Name).ToList();
+        // Only rebuild when something changed, so open dropdowns aren't disturbed
+        if (sorted.Select(p => (p.Name, p.Price)).SequenceEqual(Products.Select(p => (p.Name, p.Price)))) return;
+        Products.Clear();
+        foreach (var p in sorted) Products.Add(p);
+    }
+
+    // Re-read on focus so products saved from another computer show up
+    private void ProductSearch_GotFocus(object? sender, FocusChangedEventArgs e) => ReloadProducts();
+
+    private void ProductSearch_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (sender is AutoCompleteBox { DataContext: LineItem line, SelectedItem: Product p })
+        {
+            line.Name = p.Name;
+            line.PriceExTax = p.Price;
+        }
     }
 
     private void RefreshAddressLists()
@@ -242,6 +286,21 @@ public partial class MainWindow : Window
         if (file is null) return;
 
         // Remember the addresses for next time (re-read first so changes from other computers aren't lost)
+        // Remember the products and their latest prices
+        if (ReloadProducts())
+        {
+            try
+            {
+                foreach (var line in lines) _productStore.Upsert(line.Name, line.PriceExTax ?? 0);
+                _productStore.Save(_settings.DataFolder);
+                RefreshProductList();
+            }
+            catch (Exception ex)
+            {
+                ShowStatus($"Products couldn't be saved to {_settings.DataFolder}: {ex.Message}");
+            }
+        }
+
         if (ReloadAddresses())
         {
             try

@@ -29,7 +29,7 @@ public static class InvoicePdf
         {
             page.Size(PageSizes.A4);
             page.Margin(36);
-            page.DefaultTextStyle(t => t.FontSize(10).FontColor(colour).FontFamily(p.BodyFont, InvoiceProfile.FallbackFont));
+            page.DefaultTextStyle(t => t.FontSize(9.5f).LineHeight(1.1f).FontColor(colour).FontFamily(p.BodyFont, InvoiceProfile.FallbackFont));
 
             page.Content().Column(col =>
             {
@@ -42,10 +42,10 @@ public static class InvoicePdf
                         if (!hasLogo || p.ShowBusinessNameWithLogo)
                             c.Item().PaddingTop(hasLogo ? 6 : 0).Text(p.BusinessName)
                                 .FontFamily(p.TitleFont, InvoiceProfile.FallbackFont).FontSize(18).Bold();
-                        c.Item().PaddingTop(10).Column(info =>
+                        c.Item().PaddingTop(6).Column(info =>
                         {
                             foreach (var line in InvoiceProfile.SplitLines(p.BusinessDetails))
-                                info.Item().Text(line).FontSize(9);
+                                info.Item().Text(line).FontSize(8.5f).LineHeight(1.1f);
                         });
                     });
 
@@ -59,7 +59,7 @@ public static class InvoicePdf
                 });
 
                 // Billing / delivery address boxes
-                col.Item().PaddingTop(20).Row(row =>
+                col.Item().PaddingTop(14).Row(row =>
                 {
                     AddressBox(row.RelativeItem(), "Billing Address", invoice.Billing);
                     row.ConstantItem(16);
@@ -67,7 +67,7 @@ public static class InvoicePdf
                 });
 
                 // Line items
-                col.Item().PaddingTop(20).Table(table =>
+                col.Item().PaddingTop(14).Table(table =>
                 {
                     table.ColumnsDefinition(c =>
                     {
@@ -101,7 +101,7 @@ public static class InvoicePdf
                 });
 
                 // Totals
-                col.Item().PaddingTop(16).AlignRight().Width(220).PreventPageBreak().Column(t =>
+                col.Item().PaddingTop(10).AlignRight().Width(220).PreventPageBreak().Column(t =>
                 {
                     TotalRow(t, $"Subtotal ex {p.TaxName}", subtotal);
                     TotalRow(t, $"{p.TaxName} ({p.TaxRatePercent:0.##}%)", tax);
@@ -114,7 +114,7 @@ public static class InvoicePdf
 
                 // Payment details + signature, pushed to the bottom of the last page
                 if (InvoiceProfile.SplitLines(p.PaymentDetails).Length > 0 || p.ShowSignatureLines)
-                    col.Item().ExtendVertical().AlignBottom().PaddingTop(24).PreventPageBreak()
+                    col.Item().ExtendVertical().AlignBottom().PaddingTop(14).PreventPageBreak()
                         .Element(c => PaymentAndSignature(c, p, colour));
             });
 
@@ -160,7 +160,7 @@ public static class InvoicePdf
 
     private static void AddressBox(IContainer container, string title, Address address)
     {
-        container.Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).MinHeight(100).Column(c =>
+        container.Border(1).BorderColor(Colors.Grey.Lighten1).Padding(8).MinHeight(64).Column(c =>
         {
             c.Item().PaddingBottom(4).Text(title).Bold();
             if (!string.IsNullOrWhiteSpace(address.CustomerName))
@@ -201,7 +201,7 @@ public static class InvoicePdf
     }
 
     private static void SignatureLine(ColumnDescriptor col, string label, string colour) =>
-        col.Item().PaddingBottom(12).Row(r =>
+        col.Item().PaddingBottom(10).Row(r =>
         {
             r.ConstantItem(40).AlignBottom().Text(label).Bold();
             r.RelativeItem().Height(18).BorderBottom(0.75f).BorderColor(colour);
@@ -209,12 +209,12 @@ public static class InvoicePdf
 
     private static void HeaderCell(IContainer cell, string text, bool right = false)
     {
-        var c = cell.Background(Colors.Grey.Lighten3).PaddingVertical(6).PaddingHorizontal(4);
+        var c = cell.Background(Colors.Grey.Lighten3).PaddingVertical(4).PaddingHorizontal(4);
         (right ? c.AlignRight() : c).Text(text).Bold();
     }
 
     private static IContainer BodyCell(IContainer cell) =>
-        cell.BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten2).PaddingVertical(5).PaddingHorizontal(4);
+        cell.BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten2).PaddingVertical(2.5f).PaddingHorizontal(4);
 
     private static void TotalRow(ColumnDescriptor col, string label, decimal amount) =>
         col.Item().Row(r =>

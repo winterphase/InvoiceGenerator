@@ -13,7 +13,7 @@ public class InvoiceProfile
     public const string FileName = "invoice-settings.json";
     public const string FallbackFont = "Lato";
 
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
     // Business
     public string BusinessName { get; set; } = "Your Business Name";

@@ -8,6 +8,7 @@ It works on **Windows** and **macOS**. You can change everything on the invoice 
 
 - Line items with a name, an optional grouping column (e.g. *Cases*), a quantity (e.g. *Bottles*) and a price excluding tax. The tax and the total including tax are worked out for you.
 - Tax is rounded to the penny on each line, so the line figures always add up to the invoice total.
+- Products are remembered too. Start typing an item name to pick a product you've used before, and its last price is filled in.
 - Billing and delivery address boxes. Addresses are saved automatically and can be searched by customer name or address, and a **Delivery Address is same as Billing Address** checkbox copies the billing address across.
 - A **Settings** window with a **Preview invoice** button, so you can see changes before saving them.
 - Addresses and settings are saved in a folder you choose. Point several computers at the same shared folder (OneDrive, Dropbox, a network drive…) and they all use the same address list and invoice design.
@@ -48,10 +49,10 @@ Download the latest version from the [**Releases**](../../releases) page. The ap
 1. Check the **invoice number** and **date** at the top. The number is filled in from the current date and time, and you can change it.
 2. Fill in the **Billing Address**. Start typing in the search box to pick a saved customer, or type a new one.
 3. Fill in the **Delivery Address**, or tick **Delivery Address is same as Billing Address**.
-4. Add your line items. Use **+ Add line** for more rows and **✕** to remove one.
+4. Add your line items. Start typing an item name to see matching saved products with their last price, and pick one to fill in the name and price. Use **+ Add line** for more rows and **✕** to remove one.
 5. Click **Generate**, choose where to save the PDF, and it opens automatically.
 
-Any new or changed addresses are saved when you click **Generate**.
+Any new or changed addresses are saved when you click **Generate**. So are the products on the invoice, with their prices; a product that's already saved gets its price updated.
 
 ## Where your data is kept
 
@@ -60,17 +61,18 @@ Everything is stored in the **Data folder** shown at the top of the app. By defa
 | File | What it holds |
 |---|---|
 | `addresses.json` | Saved billing addresses (keys `BILL-0001`, `BILL-0002`, …) and delivery addresses (`DEL-0001`, …) |
+| `products.json` | Saved products and their latest price excluding tax (keys `PROD-0001`, …) |
 | `invoice-settings.json` | Everything from the Settings window |
 | `logo.png` / `logo.svg` / … | A copy of your logo |
 
-These are plain text files (apart from the logo). You can back them up or copy them to another computer, and you can edit `addresses.json` in any text editor to fix or delete an address.
+These are plain text files (apart from the logo). You can back them up or copy them to another computer, and you can edit `addresses.json` or `products.json` in any text editor to fix or delete an entry.
 
 ### Sharing between computers
 
 1. Put the data folder somewhere every computer can reach, e.g. a OneDrive, Dropbox or Google Drive folder, or a network share.
 2. On each computer, click **Change folder…** and pick that folder.
 
-If you switch to an empty folder, your current addresses and settings are copied into it, so nothing is lost. The app re-reads the files before saving, so addresses added on different computers don't overwrite each other. Try to avoid two people saving at the exact same moment, though.
+If you switch to an empty folder, your current addresses and settings are copied into it, so nothing is lost. The app re-reads the files before saving, so addresses and products added on different computers don't overwrite each other. Try to avoid two people saving at the exact same moment, though.
 
 ## Fonts
 
@@ -111,6 +113,7 @@ For Intel Macs, use `osx-x64`. For Linux, use `linux-x64`.
 | `InvoicePdf.cs` | Lays out and writes the PDF |
 | `InvoiceProfile.cs` | The invoice settings and how they're saved |
 | `Address.cs` | Addresses and the saved address list |
+| `ProductStore.cs` | Saved products and their prices |
 | `LineItem.cs` | A line on the invoice and its tax/total maths |
 | `AppSettings.cs` | Per-computer setting: which data folder to use |
 

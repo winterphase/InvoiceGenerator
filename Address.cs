@@ -38,7 +38,7 @@ public class AddressStore
 {
     public const string FileName = "addresses.json";
 
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
     public Dictionary<string, Address> BillingAddresses { get; set; } = new();
     public Dictionary<string, Address> DeliveryAddresses { get; set; } = new();
